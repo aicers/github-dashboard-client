@@ -3,6 +3,7 @@ use yew::prelude::*;
 pub enum Message {}
 
 pub struct Model {}
+
 #[derive(Properties, Clone, PartialEq)]
 pub struct Props {}
 
@@ -21,7 +22,7 @@ impl Component for Model {
     fn view(&self, _ctx: &Context<Self>) -> Html {
         html! {
             <div>
-                <p>{ "AICE Github Dashboard" }</p>
+                <p>{ "AICE GitHub Dashboard" }</p>
             </div>
         }
     }
