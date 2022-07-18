@@ -1,7 +1,6 @@
 mod home;
 
 use crate::home::{Model, Props};
-use yew;
 
 fn main() {
     let props = Props {};
