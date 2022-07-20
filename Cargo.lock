@@ -61,8 +61,12 @@ checksum = "21163e139fa306126e6eedaf49ecdb4588f939600f0b1e770f4205ee4b7fa868"
 name = "github-dashboard-client"
 version = "0.1.0"
 dependencies = [
+ "gloo-console",
+ "gloo-events",
  "gloo-net",
+ "js-sys",
  "wasm-bindgen",
+ "web-sys",
  "yew",
 ]
 

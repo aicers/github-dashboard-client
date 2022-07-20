@@ -1,15 +1,25 @@
+use gloo_console::log;
+use gloo_events::EventListener;
 use gloo_net::http::Request;
-use yew::prelude::*;
+use wasm_bindgen::prelude::*;
+use web_sys::Element;
+use yew::{
+    prelude::*,
+    {html, Component, Context, Html, NodeRef},
+};
 
 const QUERY: &str = "{\"query\": \"{ issues }\"}";
 
 pub enum Message {
     QueryResult(String),
+    SignIn(JsValue),
     Err,
 }
 
 pub struct Model {
     res_query: String,
+    node_ref: NodeRef,
+    click_listener: Option<EventListener>,
 }
 
 #[derive(Properties, Clone, PartialEq)]
@@ -22,6 +32,8 @@ impl Component for Model {
     fn create(_ctx: &Context<Self>) -> Self {
         Self {
             res_query: String::new(),
+            node_ref: NodeRef::default(),
+            click_listener: None,
         }
     }
 
@@ -32,6 +44,29 @@ impl Component for Model {
                 true
             }
             Message::Err => false,
+            Message::SignIn(text) => {
+                log!("email", text);
+                false
+            }
+        }
+    }
+
+    fn rendered(&mut self, ctx: &Context<Self>, first_render: bool) {
+        if !first_render {
+            return;
+        }
+        if let Some(element) = self.node_ref.cast::<Element>() {
+            let callback = ctx.link().callback(|e: Event| {
+                if let Ok(js_email) = js_sys::Reflect::get(&e, &JsValue::from_str("detail")) {
+                    Message::SignIn(js_email)
+                } else {
+                    Message::Err
+                }
+            });
+            let listener = EventListener::new(&element, "onsuccess", move |e: &Event| {
+                callback.emit(e.clone());
+            });
+            self.click_listener = Some(listener);
         }
     }
 
@@ -56,6 +91,7 @@ impl Component for Model {
             <div>
             <p>{ "AICE GitHub Dashboard" }</p>
             <p>{self.res_query.clone()}</p>
+            <div ref={self.node_ref.clone()} id="my-signin2"/>
             </div>
         }
     }
