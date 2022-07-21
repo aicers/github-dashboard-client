@@ -1,6 +1,9 @@
+use gloo_console::log;
 use yew::prelude::*;
 
-pub enum Message {}
+pub enum Message {
+    SignOut,
+}
 
 pub struct Model {}
 
@@ -15,14 +18,21 @@ impl Component for Model {
         Self {}
     }
 
-    fn update(&mut self, _ctx: &Context<Self>, _msg: Self::Message) -> bool {
-        true
+    fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
+        match msg {
+            Message::SignOut => {
+                log!("text", "hello");
+                true
+            }
+        }
     }
 
-    fn view(&self, _ctx: &Context<Self>) -> Html {
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        let link = ctx.link();
         html! {
             <div>
-                <p>{ "AICE GitHub Dashboard" }</p>
+                <div class={"g-signin2"} data-onsuccess="onSignIn" ></div>
+                <a href="#" onclick={link.callback(|_| Message::SignOut)}>{"Sign out"}</a>
             </div>
         }
     }
