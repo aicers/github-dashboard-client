@@ -1,6 +1,7 @@
 use gloo_console::log;
 use gloo_events::EventListener;
 use gloo_net::http::Request;
+use graphql_client::GraphQLQuery;
 use wasm_bindgen::prelude::*;
 use web_sys::Element;
 use yew::{
@@ -8,7 +9,12 @@ use yew::{
     {html, Component, Context, Html, NodeRef},
 };
 
-const QUERY: &str = "{\"query\": \"{ issues }\"}";
+#[derive(GraphQLQuery)]
+#[graphql(
+    schema_path = "src/schema.graphql",
+    query_path = "src/server_issues.graphql"
+)]
+struct ServerIssues;
 
 pub enum Message {
     QueryResult(String),
@@ -72,14 +78,21 @@ impl Component for Model {
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         ctx.link().send_future(async move {
-            if let Ok(res) = Request::post("/graphql")
-                .header("Content-Type", "application/json")
-                .body(QUERY)
-                .send()
-                .await
-            {
-                if let Ok(text) = res.text().await {
-                    Message::QueryResult(text)
+            let variables = server_issues::Variables {};
+            if let Ok(req_body) = serde_json::to_value(ServerIssues::build_query(variables)) {
+                if let Ok(req) = Request::post("/graphql")
+                    .header("Content-Type", "application/json")
+                    .json(&req_body)
+                {
+                    if let Ok(res) = req.send().await {
+                        if let Ok(text) = res.text().await {
+                            Message::QueryResult(text)
+                        } else {
+                            Message::Err
+                        }
+                    } else {
+                        Message::Err
+                    }
                 } else {
                     Message::Err
                 }
