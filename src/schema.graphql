@@ -1,0 +1,10 @@
+type Issue {
+  owner: String!
+  repo: String!
+  number: Int!
+  title: String!
+}
+
+type Query {
+  issues: [Issue!]!
+}

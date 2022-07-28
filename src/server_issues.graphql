@@ -1,0 +1,5 @@
+query ServerIssues {
+    issues {
+        number
+    }
+}
