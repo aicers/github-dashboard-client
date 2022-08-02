@@ -16,7 +16,7 @@ struct ServerIssues;
 
 pub type Issues = (i64, String);
 
-fn request<V>(query: &QueryBody<V>) -> Result<Request>
+fn request<V>(query: &QueryBody<V>, token: &str) -> Result<Request>
 where
     V: Serialize,
 {
@@ -24,13 +24,15 @@ where
         .map_err(|e| anyhow!("cannot create a GraphQL query: {}", e))?;
     let request = Request::post("/graphql")
         .header("Content-Type", "application/json")
+        .header("Authorization", &format!("Bearer {}", token))
         .json(&body)?;
     Ok(request)
 }
 
 pub trait QueryIssue: Component + Common {
     fn success_issues_info(issues: Vec<Issues>) -> Self::Message;
-    fn fetch_iussue_info(&mut self, ctx: &Context<Self>) {
+
+    fn fetch_iussue_info(&mut self, ctx: &Context<Self>, token: &str) {
         let variables = server_issues::Variables {};
 
         let response = move |res: GraphQlResponse<server_issues::ResponseData>| {
@@ -45,19 +47,19 @@ pub trait QueryIssue: Component + Common {
             }
         };
 
-        self.send_qeury::<ServerIssues, _>(ctx, variables, response);
+        self.send_qeury::<ServerIssues, _>(ctx, token, variables, response);
     }
 }
 
 pub trait Common: Component {
     fn common_error(error: CommonError) -> Self::Message;
 
-    fn send_qeury<G, F>(&self, ctx: &Context<Self>, var: G::Variables, f: F)
+    fn send_qeury<G, F>(&self, ctx: &Context<Self>, token: &str, var: G::Variables, f: F)
     where
         G: GraphQLQuery,
         F: 'static + FnOnce(GraphQlResponse<G::ResponseData>) -> Self::Message,
     {
-        if let Ok(req) = request(&G::build_query(var)) {
+        if let Ok(req) = request(&G::build_query(var), token) {
             ctx.link().send_future(async move {
                 if let Ok(res) = req.send().await {
                     if res.ok() {
