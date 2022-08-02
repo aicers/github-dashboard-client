@@ -1,7 +1,7 @@
+use crate::fetch::{Common, QueryIssue};
+use crate::CommonError;
 use gloo_console::log;
 use gloo_events::EventListener;
-use gloo_net::http::Request;
-use graphql_client::GraphQLQuery;
 use wasm_bindgen::prelude::*;
 use web_sys::Element;
 use yew::{
@@ -9,21 +9,16 @@ use yew::{
     {html, Component, Context, Html, NodeRef},
 };
 
-#[derive(GraphQLQuery)]
-#[graphql(
-    schema_path = "src/schema.graphql",
-    query_path = "src/server_issues.graphql"
-)]
-struct ServerIssues;
+use crate::fetch::Issues;
 
 pub enum Message {
-    QueryResult(String),
+    QueryResult(Vec<Issues>),
     SignIn(JsValue),
-    Err,
+    Err(CommonError),
 }
 
 pub struct Model {
-    res_query: String,
+    res_query: Vec<Issues>,
     node_ref: NodeRef,
     click_listener: Option<EventListener>,
 }
@@ -31,13 +26,25 @@ pub struct Model {
 #[derive(Properties, Clone, PartialEq)]
 pub struct Props {}
 
+impl QueryIssue for Model {
+    fn success_issues_info(issues: Vec<Issues>) -> Self::Message {
+        Message::QueryResult(issues)
+    }
+}
+
+impl Common for Model {
+    fn common_error(error: CommonError) -> Self::Message {
+        Message::Err(error)
+    }
+}
+
 impl Component for Model {
     type Message = Message;
     type Properties = Props;
 
     fn create(_ctx: &Context<Self>) -> Self {
         Self {
-            res_query: String::new(),
+            res_query: Vec::new(),
             node_ref: NodeRef::default(),
             click_listener: None,
         }
@@ -49,7 +56,10 @@ impl Component for Model {
                 self.res_query = text;
                 true
             }
-            Message::Err => false,
+            Message::Err(error) => {
+                log!("error", format!("{:#?}", error));
+                false
+            }
             Message::SignIn(text) => {
                 log!("email", text);
                 false
@@ -66,7 +76,7 @@ impl Component for Model {
                 if let Ok(js_email) = js_sys::Reflect::get(&e, &JsValue::from_str("detail")) {
                     Message::SignIn(js_email)
                 } else {
-                    Message::Err
+                    Message::Err(CommonError::UnknownError)
                 }
             });
             let listener = EventListener::new(&element, "onsuccess", move |e: &Event| {
@@ -74,38 +84,28 @@ impl Component for Model {
             });
             self.click_listener = Some(listener);
         }
+        self.fetch_iussue_info(ctx);
     }
 
-    fn view(&self, ctx: &Context<Self>) -> Html {
-        ctx.link().send_future(async move {
-            let variables = server_issues::Variables {};
-            if let Ok(req_body) = serde_json::to_value(ServerIssues::build_query(variables)) {
-                if let Ok(req) = Request::post("/graphql")
-                    .header("Content-Type", "application/json")
-                    .json(&req_body)
-                {
-                    if let Ok(res) = req.send().await {
-                        if let Ok(text) = res.text().await {
-                            Message::QueryResult(text)
-                        } else {
-                            Message::Err
-                        }
-                    } else {
-                        Message::Err
-                    }
-                } else {
-                    Message::Err
-                }
-            } else {
-                Message::Err
-            }
-        });
+    fn view(&self, _ctx: &Context<Self>) -> Html {
         html! {
-            <div>
-            <p>{ "AICE GitHub Dashboard" }</p>
-            <p>{self.res_query.clone()}</p>
-            <div ref={self.node_ref.clone()} id="my-signin2"/>
-            </div>
+                <div>
+                <p>{ "AICE GitHub Dashboard" }</p>
+
+                <table border="1px">
+                {
+                    for self.res_query.iter().map(|(number,title)| {
+                        html! {
+                            <tr>
+                                <td>{number}</td>
+                                <td>{title}</td>
+                            </tr>
+                        }
+                    })
+                }
+                </table>
+                <div ref={self.node_ref.clone()} id="my-signin2"/>
+                </div>
         }
     }
 }
