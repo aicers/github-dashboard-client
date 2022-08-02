@@ -11,7 +11,7 @@ function renderButton() {
 }
 function onSuccess(googleUser) {
     let btn = document.getElementById("my-signin2");
-    const event = new CustomEvent("onsuccess", { detail: googleUser.getBasicProfile().getEmail() });
+    const event = new CustomEvent("onsuccess", { detail: { email: googleUser.getBasicProfile().getEmail(), token: googleUser.getAuthResponse().id_token } });
     btn.dispatchEvent(event);
 }
 function onFailure(error) {

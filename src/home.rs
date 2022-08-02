@@ -1,7 +1,8 @@
-use crate::fetch::{Common, QueryIssue};
+use crate::fetch::{Common, Issues, QueryIssue};
 use crate::CommonError;
 use gloo_console::log;
 use gloo_events::EventListener;
+use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 use web_sys::Element;
 use yew::{
@@ -9,11 +10,9 @@ use yew::{
     {html, Component, Context, Html, NodeRef},
 };
 
-use crate::fetch::Issues;
-
 pub enum Message {
     QueryResult(Vec<Issues>),
-    SignIn(JsValue),
+    SignIn(Detail),
     Err(CommonError),
 }
 
@@ -21,10 +20,17 @@ pub struct Model {
     res_query: Vec<Issues>,
     node_ref: NodeRef,
     click_listener: Option<EventListener>,
+    id_token: String,
 }
 
 #[derive(Properties, Clone, PartialEq)]
 pub struct Props {}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct Detail {
+    pub email: String,
+    pub token: String,
+}
 
 impl QueryIssue for Model {
     fn success_issues_info(issues: Vec<Issues>) -> Self::Message {
@@ -47,6 +53,7 @@ impl Component for Model {
             res_query: Vec::new(),
             node_ref: NodeRef::default(),
             click_listener: None,
+            id_token: String::new(),
         }
     }
 
@@ -60,8 +67,9 @@ impl Component for Model {
                 log!("error", format!("{:#?}", error));
                 false
             }
-            Message::SignIn(text) => {
-                log!("email", text);
+            Message::SignIn(detail) => {
+                self.id_token.push_str(&detail.token);
+                log!("email", detail.email);
                 false
             }
         }
@@ -73,8 +81,12 @@ impl Component for Model {
         }
         if let Some(element) = self.node_ref.cast::<Element>() {
             let callback = ctx.link().callback(|e: Event| {
-                if let Ok(js_email) = js_sys::Reflect::get(&e, &JsValue::from_str("detail")) {
-                    Message::SignIn(js_email)
+                if let Ok(js_val) = js_sys::Reflect::get(&e, &JsValue::from_str("detail")) {
+                    if let Ok(detail_val) = js_val.into_serde::<Detail>() {
+                        Message::SignIn(detail_val)
+                    } else {
+                        Message::Err(CommonError::UnknownError)
+                    }
                 } else {
                     Message::Err(CommonError::UnknownError)
                 }
@@ -84,7 +96,7 @@ impl Component for Model {
             });
             self.click_listener = Some(listener);
         }
-        self.fetch_iussue_info(ctx);
+        self.fetch_iussue_info(ctx, &self.id_token.clone());
     }
 
     fn view(&self, _ctx: &Context<Self>) -> Html {
