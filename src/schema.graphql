@@ -1,3 +1,23 @@
+type GithubConnection {
+  # Information to aid in pagination.
+  pageInfo: PageInfo!
+
+  # A list of edges.
+  edges: [GithubEdge!]!
+
+  # A list of nodes.
+  nodes: [Issue!]!
+}
+
+# An edge in a connection.
+type GithubEdge {
+  # A cursor for use in pagination
+  cursor: String!
+
+  # The item at the end of the edge
+  node: Issue!
+}
+
 type Issue {
   owner: String!
   repo: String!
@@ -5,6 +25,26 @@ type Issue {
   title: String!
 }
 
+# Information about pagination in a connection
+type PageInfo {
+  # When paginating backwards, are there more items?
+  hasPreviousPage: Boolean!
+
+  # When paginating forwards, are there more items?
+  hasNextPage: Boolean!
+
+  # When paginating backwards, the cursor to continue.
+  startCursor: String
+
+  # When paginating forwards, the cursor to continue.
+  endCursor: String
+}
+
 type Query {
-  issues: [Issue!]!
+  issues(
+    after: String
+    before: String
+    first: Int
+    last: Int
+  ): GithubConnection!
 }

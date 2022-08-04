@@ -103,18 +103,22 @@ impl Component for Model {
         html! {
                 <div>
                 <p>{ "AICE GitHub Dashboard" }</p>
-
                 <table border="1px">
-                {
-                    for self.res_query.iter().map(|(number,title)| {
-                        html! {
-                            <tr>
-                                <td>{number}</td>
-                                <td>{title}</td>
-                            </tr>
-                        }
-                    })
-                }
+                    <tr>
+                        <th>{"Number"}</th>
+                        <th>{"Issue Title"}</th>
+                    </tr>
+                    {
+                        for self.res_query.iter().map(|(owner, repo, number, title)| {
+                            let href= format!("https://github.com/{}/{}/issues/{}", owner, repo, number);
+                            html! {
+                                <tr>
+                                    <td align="center">{number}</td>
+                                    <td><a href={href}>{title}</a></td>
+                                </tr>
+                            }
+                        })
+                    }
                 </table>
                 <div ref={self.node_ref.clone()} id="my-signin2"/>
                 </div>

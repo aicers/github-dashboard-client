@@ -1,6 +1,13 @@
 query ServerIssues {
     issues {
-        number,
-        title,
+        edges {
+            cursor
+            node {
+                owner
+                repo
+                number
+                title
+            }
+        }
     }
 }
