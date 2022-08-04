@@ -14,7 +14,7 @@ use yew::{Component, Context};
 )]
 struct ServerIssues;
 
-pub type Issues = (i64, String);
+pub type Issues = (String, String, i64, String);
 
 fn request<V>(query: &QueryBody<V>, token: &str) -> Result<Request>
 where
@@ -38,8 +38,13 @@ pub trait QueryIssue: Component + Common {
         let response = move |res: GraphQlResponse<server_issues::ResponseData>| {
             if let Some(val) = res.data {
                 let mut vec_list: Vec<Issues> = Vec::new();
-                for item in val.issues {
-                    vec_list.push((item.number, item.title));
+                for item in val.issues.edges {
+                    vec_list.push((
+                        item.node.owner,
+                        item.node.repo,
+                        item.node.number,
+                        item.node.title,
+                    ));
                 }
                 Self::success_issues_info(vec_list)
             } else {
