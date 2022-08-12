@@ -23,7 +23,7 @@ pub struct Model {
     id_token: String,
 }
 
-#[derive(Properties, Clone, PartialEq)]
+#[derive(Clone, Eq, PartialEq, Properties)]
 pub struct Props {}
 
 #[derive(Debug, Deserialize, Serialize)]
