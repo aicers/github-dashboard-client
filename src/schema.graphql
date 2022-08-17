@@ -1,28 +1,28 @@
-type GithubConnection {
+type Issue {
+  owner: String!
+  repo: String!
+  number: Int!
+  title: String!
+}
+
+type IssueConnection {
   # Information to aid in pagination.
   pageInfo: PageInfo!
 
   # A list of edges.
-  edges: [GithubEdge!]!
+  edges: [IssueEdge!]!
 
   # A list of nodes.
   nodes: [Issue!]!
 }
 
 # An edge in a connection.
-type GithubEdge {
+type IssueEdge {
   # A cursor for use in pagination
   cursor: String!
 
   # The item at the end of the edge
   node: Issue!
-}
-
-type Issue {
-  owner: String!
-  repo: String!
-  number: Int!
-  title: String!
 }
 
 # Information about pagination in a connection
@@ -40,11 +40,39 @@ type PageInfo {
   endCursor: String
 }
 
+type PullRequest {
+  owner: String!
+  repo: String!
+  number: Int!
+  title: String!
+}
+
+type PullRequestConnection {
+  # Information to aid in pagination.
+  pageInfo: PageInfo!
+
+  # A list of edges.
+  edges: [PullRequestEdge!]!
+
+  # A list of nodes.
+  nodes: [PullRequest!]!
+}
+
+# An edge in a connection.
+type PullRequestEdge {
+  # A cursor for use in pagination
+  cursor: String!
+
+  # The item at the end of the edge
+  node: PullRequest!
+}
+
 type Query {
-  issues(
+  issues(after: String, before: String, first: Int, last: Int): IssueConnection!
+  pullRequests(
     after: String
     before: String
     first: Int
     last: Int
-  ): GithubConnection!
+  ): PullRequestConnection!
 }
