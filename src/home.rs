@@ -1,4 +1,4 @@
-use crate::fetch::{Common, Issues, QueryIssue};
+use crate::fetch::{Common, Issues, Pulls, QueryIssue, QueryPull};
 use crate::CommonError;
 use gloo_console::log;
 use gloo_events::EventListener;
@@ -11,13 +11,15 @@ use yew::{
 };
 
 pub enum Message {
-    QueryResult(Vec<Issues>),
+    IssueQueryResult(Vec<Issues>),
+    PullQueryResult(Vec<Pulls>),
     SignIn(Detail),
     Err(CommonError),
 }
 
 pub struct Model {
-    res_query: Vec<Issues>,
+    issue_res_query: Vec<Issues>,
+    pull_res_query: Vec<Pulls>,
     node_ref: NodeRef,
     click_listener: Option<EventListener>,
     id_token: String,
@@ -34,7 +36,13 @@ pub struct Detail {
 
 impl QueryIssue for Model {
     fn success_issues_info(issues: Vec<Issues>) -> Self::Message {
-        Message::QueryResult(issues)
+        Message::IssueQueryResult(issues)
+    }
+}
+
+impl QueryPull for Model {
+    fn success_pulls_info(pulls: Vec<Pulls>) -> Self::Message {
+        Message::PullQueryResult(pulls)
     }
 }
 
@@ -50,7 +58,8 @@ impl Component for Model {
 
     fn create(_ctx: &Context<Self>) -> Self {
         Self {
-            res_query: Vec::new(),
+            issue_res_query: Vec::new(),
+            pull_res_query: Vec::new(),
             node_ref: NodeRef::default(),
             click_listener: None,
             id_token: String::new(),
@@ -59,8 +68,12 @@ impl Component for Model {
 
     fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            Message::QueryResult(text) => {
-                self.res_query = text;
+            Message::IssueQueryResult(text) => {
+                self.issue_res_query = text;
+                true
+            }
+            Message::PullQueryResult(text) => {
+                self.pull_res_query = text;
                 true
             }
             Message::Err(error) => {
@@ -96,7 +109,8 @@ impl Component for Model {
             });
             self.click_listener = Some(listener);
         }
-        self.fetch_iussue_info(ctx, &self.id_token.clone());
+        self.fetch_issue_info(ctx, &self.id_token.clone());
+        self.fetch_pulls_info(ctx, &self.id_token.clone());
     }
 
     fn view(&self, _ctx: &Context<Self>) -> Html {
@@ -106,10 +120,27 @@ impl Component for Model {
                 <table border="1px">
                     <tr>
                         <th>{"Number"}</th>
+                        <th>{"Pull Request Title"}</th>
+                    </tr>
+                    {
+                        for self.pull_res_query.iter().map(|(owner, repo, number, title)| {
+                            let href= format!("https://github.com/{}/{}/pull/{}", owner, repo, number);
+                            html! {
+                                <tr>
+                                    <td align="center">{number}</td>
+                                    <td><a href={href}>{title}</a></td>
+                                </tr>
+                            }
+                        })
+                    }
+                </table>
+                <table border="1px">
+                    <tr>
+                        <th>{"Number"}</th>
                         <th>{"Issue Title"}</th>
                     </tr>
                     {
-                        for self.res_query.iter().map(|(owner, repo, number, title)| {
+                        for self.issue_res_query.iter().map(|(owner, repo, number, title)| {
                             let href= format!("https://github.com/{}/{}/issues/{}", owner, repo, number);
                             html! {
                                 <tr>

@@ -1,0 +1,13 @@
+query ServerPulls {
+    pullRequests {
+        edges {
+            cursor
+            node {
+                owner
+                repo
+                number
+                title
+            }
+        }
+    }
+}

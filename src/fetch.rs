@@ -15,8 +15,16 @@ use yew::{Component, Context};
     response_derives = "Clone, PartialEq, Debug"
 )]
 struct ServerIssues;
-
 pub type Issues = (String, String, i64, String);
+
+#[derive(GraphQLQuery)]
+#[graphql(
+    schema_path = "src/schema.graphql",
+    query_path = "src/server_pull_requests.graphql",
+    response_derives = "Clone, PartialEq, Debug"
+)]
+struct ServerPulls;
+pub type Pulls = (String, String, i64, String);
 
 fn request<V>(query: &QueryBody<V>, token: &str) -> Result<Request>
 where
@@ -34,7 +42,7 @@ where
 pub trait QueryIssue: Component + Common {
     fn success_issues_info(issues: Vec<Issues>) -> Self::Message;
 
-    fn fetch_iussue_info(&mut self, ctx: &Context<Self>, token: &str) {
+    fn fetch_issue_info(&mut self, ctx: &Context<Self>, token: &str) {
         let variables = server_issues::Variables {};
 
         let response = move |res: GraphQlResponse<server_issues::ResponseData>| {
@@ -55,6 +63,33 @@ pub trait QueryIssue: Component + Common {
         };
 
         self.send_qeury::<ServerIssues, _>(ctx, token, variables, response);
+    }
+}
+
+pub trait QueryPull: Component + Common {
+    fn success_pulls_info(issues: Vec<Pulls>) -> Self::Message;
+
+    fn fetch_pulls_info(&mut self, ctx: &Context<Self>, token: &str) {
+        let variables = server_pulls::Variables {};
+
+        let response = move |res: GraphQlResponse<server_pulls::ResponseData>| {
+            if let Some(val) = res.data {
+                let mut vec_list: Vec<Pulls> = Vec::new();
+                for item in val.pull_requests.edges {
+                    vec_list.push((
+                        item.node.owner,
+                        item.node.repo,
+                        item.node.number,
+                        item.node.title,
+                    ));
+                }
+                Self::success_pulls_info(vec_list)
+            } else {
+                Self::common_error(CommonError::ResponseParseError)
+            }
+        };
+
+        self.send_qeury::<ServerPulls, _>(ctx, token, variables, response);
     }
 }
 
