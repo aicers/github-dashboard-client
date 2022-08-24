@@ -119,7 +119,7 @@ impl Component for Model {
                 <p>{ "AICE GitHub Dashboard" }</p>
                 <table border="1px">
                     <tr>
-                        <th>{"Number"}</th>
+                        <th>{"Owner/Repository/Number"}</th>
                         <th>{"Pull Request Title"}</th>
                         <th>{"Assignees"}</th>
                     </tr>
@@ -129,7 +129,7 @@ impl Component for Model {
                             let assignees= assignees.join(", ");
                             html! {
                                 <tr>
-                                    <td align="center">{number}</td>
+                                    <td align="center">{owner}{"/"}{repo}{"#"}{number}</td>
                                     <td><a href={href}>{title}</a></td>
                                     <td>{assignees}</td>
                                 </tr>
@@ -139,7 +139,7 @@ impl Component for Model {
                 </table>
                 <table border="1px">
                     <tr>
-                        <th>{"Number"}</th>
+                        <th>{"Owner/Repository/Number"}</th>
                         <th>{"Issue Title"}</th>
                     </tr>
                     {
@@ -147,7 +147,7 @@ impl Component for Model {
                             let href= format!("https://github.com/{}/{}/issues/{}", owner, repo, number);
                             html! {
                                 <tr>
-                                    <td align="center">{number}</td>
+                                    <td align="center">{owner}{"/"}{repo}{"#"}{number}</td>
                                     <td><a href={href}>{title}</a></td>
                                 </tr>
                             }
