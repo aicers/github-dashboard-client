@@ -45,6 +45,7 @@ type PullRequest {
   repo: String!
   number: Int!
   title: String!
+  assignees: [String!]!
 }
 
 type PullRequestConnection {
