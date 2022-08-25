@@ -1,4 +1,5 @@
 use crate::fetch::{Common, Issues, Pulls, QueryIssue, QueryPull};
+use crate::top_pane::TopModel;
 use crate::CommonError;
 use gloo_console::log;
 use gloo_events::EventListener;
@@ -23,6 +24,7 @@ pub struct Model {
     node_ref: NodeRef,
     click_listener: Option<EventListener>,
     id_token: String,
+    email: String,
 }
 
 #[derive(Clone, Eq, PartialEq, Properties)]
@@ -63,6 +65,7 @@ impl Component for Model {
             node_ref: NodeRef::default(),
             click_listener: None,
             id_token: String::new(),
+            email: String::new(),
         }
     }
 
@@ -82,8 +85,9 @@ impl Component for Model {
             }
             Message::SignIn(detail) => {
                 self.id_token.push_str(&detail.token);
+                self.email.push_str(&detail.email);
                 log!("email", detail.email);
-                false
+                true
             }
         }
     }
@@ -116,6 +120,7 @@ impl Component for Model {
     fn view(&self, _ctx: &Context<Self>) -> Html {
         html! {
                 <div>
+                <TopModel email={self.email.clone()}/>
                 <p>{ "AICE GitHub Dashboard" }</p>
                 <table border="1px">
                     <tr>
