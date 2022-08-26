@@ -46,6 +46,7 @@ type PullRequest {
   number: Int!
   title: String!
   assignees: [String!]!
+  reviewers: [String!]!
 }
 
 type PullRequestConnection {

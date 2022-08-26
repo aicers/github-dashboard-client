@@ -24,7 +24,7 @@ pub type Issues = (String, String, i64, String);
     response_derives = "Clone, PartialEq, Debug"
 )]
 struct ServerPulls;
-pub type Pulls = (String, String, i64, String, Vec<String>);
+pub type Pulls = (String, String, i64, String, Vec<String>, Vec<String>);
 
 fn request<V>(query: &QueryBody<V>, token: &str) -> Result<Request>
 where
@@ -82,6 +82,7 @@ pub trait QueryPull: Component + Common {
                         item.node.number,
                         item.node.title,
                         item.node.assignees,
+                        item.node.reviewers,
                     ));
                 }
                 Self::success_pulls_info(vec_list)
