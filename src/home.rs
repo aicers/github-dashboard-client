@@ -126,16 +126,19 @@ impl Component for Model {
                     <tr>
                         <th>{"Owner/Repository/Number"}</th>
                         <th>{"Pull Request Title"}</th>
+                        <th>{"Reviewers"}</th>
                         <th>{"Assignees"}</th>
                     </tr>
                     {
-                        for self.pull_res_query.iter().map(|(owner, repo, number, title, assignees)| {
+                        for self.pull_res_query.iter().map(|(owner, repo, number, title, assignees, reviewers)| {
                             let href= format!("https://github.com/{}/{}/pull/{}", owner, repo, number);
                             let assignees= assignees.join(", ");
+                            let reviewers= reviewers.join(", ");
                             html! {
                                 <tr>
                                     <td align="center">{owner}{"/"}{repo}{"#"}{number}</td>
                                     <td><a href={href}>{title}</a></td>
+                                    <td>{reviewers}</td>
                                     <td>{assignees}</td>
                                 </tr>
                             }
