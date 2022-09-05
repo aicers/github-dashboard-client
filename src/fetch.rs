@@ -15,7 +15,7 @@ use yew::{Component, Context};
     response_derives = "Clone, PartialEq, Debug"
 )]
 struct ServerIssues;
-pub type Issues = (String, String, i64, String);
+pub type Issues = (String, String, i64, String, String);
 
 #[derive(GraphQLQuery)]
 #[graphql(
@@ -54,6 +54,7 @@ pub trait QueryIssue: Component + Common {
                         item.node.repo,
                         item.node.number,
                         item.node.title,
+                        item.node.author,
                     ));
                 }
                 Self::success_issues_info(vec_list)

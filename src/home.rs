@@ -149,14 +149,16 @@ impl Component for Model {
                     <tr>
                         <th>{"Owner/Repository/Number"}</th>
                         <th>{"Issue Title"}</th>
+                        <th>{"Author"}</th>
                     </tr>
                     {
-                        for self.issue_res_query.iter().map(|(owner, repo, number, title)| {
+                        for self.issue_res_query.iter().map(|(owner, repo, number, title, author)| {
                             let href= format!("https://github.com/{}/{}/issues/{}", owner, repo, number);
                             html! {
                                 <tr>
                                     <td align="center">{owner}{"/"}{repo}{"#"}{number}</td>
                                     <td><a href={href}>{title}</a></td>
+                                    <td>{author}</td>
                                 </tr>
                             }
                         })
