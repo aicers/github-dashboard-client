@@ -120,13 +120,16 @@ impl Component for Model {
                 <div>
                 <TopModel email={self.email.clone()}/>
                 <p>{ "AICE GitHub Dashboard" }</p>
-                <table border="1px">
-                    <tr>
-                        <th>{"Owner/Repository/Number"}</th>
-                        <th>{"Pull Request Title"}</th>
-                        <th>{"Reviewers"}</th>
-                        <th>{"Assignees"}</th>
-                    </tr>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>{"Owner/Repository/Number"}</th>
+                            <th>{"Pull Request Title"}</th>
+                            <th>{"Reviewers"}</th>
+                            <th>{"Assignees"}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
                     {
                         for self.pull_res_query.iter().map(|(owner, repo, number, title, assignees, reviewers)| {
                             let href= format!("https://github.com/{}/{}/pull/{}", owner, repo, number);
@@ -142,13 +145,17 @@ impl Component for Model {
                             }
                         })
                     }
+                    </tbody>
                 </table>
-                <table border="1px">
-                    <tr>
-                        <th>{"Owner/Repository/Number"}</th>
-                        <th>{"Issue Title"}</th>
-                        <th>{"Author"}</th>
-                    </tr>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>{"Owner/Repository/Number"}</th>
+                            <th>{"Issue Title"}</th>
+                            <th>{"Author"}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
                     {
                         for self.issue_res_query.iter().map(|(owner, repo, number, title, author)| {
                             let href= format!("https://github.com/{}/{}/issues/{}", owner, repo, number);
@@ -161,6 +168,7 @@ impl Component for Model {
                             }
                         })
                     }
+                    </tbody>
                 </table>
                 <div ref={self.node_ref.clone()} id="my-signin2"/>
                 </div>
