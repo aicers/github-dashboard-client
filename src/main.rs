@@ -2,7 +2,7 @@ mod fetch;
 mod home;
 mod top_pane;
 
-use crate::home::{Model, Props};
+use crate::home::Model;
 
 #[derive(Debug)]
 pub enum CommonError {
@@ -15,6 +15,5 @@ pub enum CommonError {
 }
 
 fn main() {
-    let props = Props {};
-    yew::start_app_with_props::<Model>(props);
+    yew::start_app::<Model>();
 }

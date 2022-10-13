@@ -3,6 +3,7 @@ use crate::top_pane::TopModel;
 use crate::CommonError;
 use gloo_console::log;
 use gloo_events::EventListener;
+use gloo_utils::format::JsValueSerdeExt;
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 use web_sys::Element;
@@ -26,9 +27,6 @@ pub struct Model {
     id_token: String,
     email: String,
 }
-
-#[derive(Clone, Eq, PartialEq, Properties)]
-pub struct Props {}
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Detail {
@@ -56,7 +54,7 @@ impl Common for Model {
 
 impl Component for Model {
     type Message = Message;
-    type Properties = Props;
+    type Properties = ();
 
     fn create(_ctx: &Context<Self>) -> Self {
         Self {
@@ -99,7 +97,7 @@ impl Component for Model {
         if let Some(element) = self.node_ref.cast::<Element>() {
             let callback = ctx.link().callback(|e: Event| {
                 if let Ok(js_val) = js_sys::Reflect::get(&e, &JsValue::from_str("detail")) {
-                    if let Ok(detail_val) = js_val.into_serde::<Detail>() {
+                    if let Ok(detail_val) = JsValueSerdeExt::into_serde::<Detail>(&js_val) {
                         Message::SignIn(detail_val)
                     } else {
                         Message::Err(CommonError::UnknownError)
