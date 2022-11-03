@@ -30,8 +30,8 @@ fn request<V>(query: &QueryBody<V>, token: &str) -> Result<Request>
 where
     V: Serialize,
 {
-    let body = serde_json::to_value(&query)
-        .map_err(|e| anyhow!("cannot create a GraphQL query: {}", e))?;
+    let body =
+        serde_json::to_value(query).map_err(|e| anyhow!("cannot create a GraphQL query: {}", e))?;
     let request = Request::post("/graphql")
         .header("Content-Type", "application/json")
         .header("Authorization", &format!("Bearer {}", token))
