@@ -78,7 +78,7 @@ impl Component for Model {
                 true
             }
             Message::Err(error) => {
-                log!("error", format!("{:#?}", error));
+                log!("error", format!("{error:#?}"));
                 false
             }
             Message::SignIn(detail) => {
@@ -132,7 +132,7 @@ impl Component for Model {
                     <tbody>
                     {
                         for self.pull_res_query.iter().map(|(owner, repo, number, title, assignees, reviewers)| {
-                            let href= format!("https://github.com/{}/{}/pull/{}", owner, repo, number);
+                            let href= format!("https://github.com/{owner}/{repo}/pull/{number}");
                             let assignees= assignees.join(", ");
                             let reviewers= reviewers.join(", ");
                             html! {
@@ -158,7 +158,7 @@ impl Component for Model {
                     <tbody>
                     {
                         for self.issue_res_query.iter().map(|(owner, repo, number, title, author)| {
-                            let href= format!("https://github.com/{}/{}/issues/{}", owner, repo, number);
+                            let href= format!("https://github.com/{owner}/{repo}/issues/{number}");
                             html! {
                                 <tr>
                                     <td align="center">{owner}{"/"}{repo}{"#"}{number}</td>
