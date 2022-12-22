@@ -9,9 +9,11 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v3
     - name: Install Rust
-      uses: hecrj/setup-rust-action@v1
-    - uses: actions/checkout@v2
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        components: clippy, rustfmt
     - name: Check formatting
       run: cargo fmt -- --check
     - name: Clippy
@@ -22,13 +24,13 @@ jobs:
   wasm:
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v3
     - name: Install Rust
-      uses: hecrj/setup-rust-action@v1
+      uses: dtolnay/rust-toolchain@stable
       with:
         targets: wasm32-unknown-unknown
     - name: Install Trunk
-      uses: jetli/trunk-action@v0.1.0
-    - uses: actions/checkout@v2
+      uses: jetli/trunk-action@v0.2.0
     - name: Build
       run: trunk build
 
@@ -38,9 +40,9 @@ jobs:
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
     steps:
+    - uses: actions/checkout@v3
     - name: Install Rust
-      uses: hecrj/setup-rust-action@v1
-    - uses: actions/checkout@v2
+      uses: dtolnay/rust-toolchain@stable
     - name: Build
       run: cargo build --verbose
     - name: Run tests
