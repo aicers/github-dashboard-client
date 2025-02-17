@@ -1,6 +1,3 @@
-use crate::fetch::{Common, Issues, Pulls, QueryIssue, QueryPull};
-use crate::top_pane::TopModel;
-use crate::CommonError;
 use gloo_console::log;
 use gloo_events::EventListener;
 use gloo_utils::format::JsValueSerdeExt;
@@ -11,6 +8,10 @@ use yew::{
     prelude::*,
     {html, Component, Context, Html, NodeRef},
 };
+
+use crate::fetch::{Common, Issues, Pulls, QueryIssue, QueryPull};
+use crate::top_pane::TopModel;
+use crate::CommonError;
 
 pub enum Message {
     IssueQueryResult(Vec<Issues>),

@@ -1,6 +1,5 @@
 #![allow(clippy::derive_partial_eq_without_eq)] // GraphQLQuery implements PartialEq but not Eq
 
-use crate::CommonError;
 use anyhow::{anyhow, Result};
 use gloo_net::http::Request;
 use graphql_client::QueryBody;
@@ -8,6 +7,7 @@ use graphql_client::{GraphQLQuery, Response as GraphQlResponse};
 use serde::Serialize;
 use yew::{Component, Context};
 
+use crate::CommonError;
 #[derive(GraphQLQuery)]
 #[graphql(
     schema_path = "src/schema.graphql",
