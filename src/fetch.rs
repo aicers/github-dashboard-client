@@ -123,6 +123,6 @@ pub trait Common: Component {
         } else {
             ctx.link()
                 .send_message(Self::common_error(CommonError::SendGraphQLQueryError));
-        };
+        }
     }
 }
