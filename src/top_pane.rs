@@ -3,11 +3,11 @@ use yew::{
     {html, Component, Context, Html},
 };
 
-pub struct TopModel;
-pub enum Message {}
+pub(super) struct TopModel;
+pub(super) enum Message {}
 
 #[derive(Clone, Eq, PartialEq, Properties)]
-pub struct Props {
+pub(super) struct Props {
     pub email: String,
 }
 
