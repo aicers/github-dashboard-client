@@ -15,7 +15,7 @@ use crate::CommonError;
     response_derives = "Clone, PartialEq, Debug"
 )]
 struct ServerIssues;
-pub type Issues = (String, String, i64, String, String);
+pub(crate) type Issues = (String, String, i64, String, String);
 
 #[derive(GraphQLQuery)]
 #[graphql(
@@ -24,7 +24,7 @@ pub type Issues = (String, String, i64, String, String);
     response_derives = "Clone, PartialEq, Debug"
 )]
 struct ServerPulls;
-pub type Pulls = (String, String, i64, String, Vec<String>, Vec<String>);
+pub(crate) type Pulls = (String, String, i64, String, Vec<String>, Vec<String>);
 
 fn request<V>(query: &QueryBody<V>, token: &str) -> Result<Request>
 where
@@ -39,7 +39,7 @@ where
     Ok(request)
 }
 
-pub trait QueryIssue: Component + Common {
+pub(super) trait QueryIssue: Component + Common {
     fn success_issues_info(issues: Vec<Issues>) -> Self::Message;
 
     fn fetch_issue_info(&mut self, ctx: &Context<Self>, token: &str) {
@@ -67,7 +67,7 @@ pub trait QueryIssue: Component + Common {
     }
 }
 
-pub trait QueryPull: Component + Common {
+pub(super) trait QueryPull: Component + Common {
     fn success_pulls_info(issues: Vec<Pulls>) -> Self::Message;
 
     fn fetch_pulls_info(&mut self, ctx: &Context<Self>, token: &str) {
@@ -96,7 +96,7 @@ pub trait QueryPull: Component + Common {
     }
 }
 
-pub trait Common: Component {
+pub(super) trait Common: Component {
     fn common_error(error: CommonError) -> Self::Message;
 
     fn send_qeury<G, F>(&self, ctx: &Context<Self>, token: &str, var: G::Variables, f: F)
@@ -123,6 +123,6 @@ pub trait Common: Component {
         } else {
             ctx.link()
                 .send_message(Self::common_error(CommonError::SendGraphQLQueryError));
-        };
+        }
     }
 }
