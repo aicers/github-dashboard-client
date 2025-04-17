@@ -63,7 +63,7 @@ pub trait QueryIssue: Component + Common {
             }
         };
 
-        self.send_qeury::<ServerIssues, _>(ctx, token, variables, response);
+        self.send_query::<ServerIssues, _>(ctx, token, variables, response);
     }
 }
 
@@ -92,14 +92,14 @@ pub trait QueryPull: Component + Common {
             }
         };
 
-        self.send_qeury::<ServerPulls, _>(ctx, token, variables, response);
+        self.send_query::<ServerPulls, _>(ctx, token, variables, response);
     }
 }
 
 pub trait Common: Component {
     fn common_error(error: CommonError) -> Self::Message;
 
-    fn send_qeury<G, F>(&self, ctx: &Context<Self>, token: &str, var: G::Variables, f: F)
+    fn send_query<G, F>(&self, ctx: &Context<Self>, token: &str, var: G::Variables, f: F)
     where
         G: GraphQLQuery,
         F: 'static + FnOnce(GraphQlResponse<G::ResponseData>) -> Self::Message,
