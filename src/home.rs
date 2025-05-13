@@ -13,14 +13,14 @@ use crate::fetch::{Common, Issues, Pulls, QueryIssue, QueryPull};
 use crate::top_pane::TopModel;
 use crate::CommonError;
 
-pub enum Message {
+pub(crate) enum Message {
     IssueQueryResult(Vec<Issues>),
     PullQueryResult(Vec<Pulls>),
     SignIn(Detail),
     Err(CommonError),
 }
 
-pub struct Model {
+pub(crate) struct Model {
     issue_res_query: Vec<Issues>,
     pull_res_query: Vec<Pulls>,
     node_ref: NodeRef,
@@ -30,7 +30,7 @@ pub struct Model {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct Detail {
+pub(super) struct Detail {
     pub email: String,
     pub token: String,
 }
