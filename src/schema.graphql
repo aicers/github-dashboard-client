@@ -1,9 +1,18 @@
+# Indicates that an Input Object is a OneOf Input Object (and thus requires
+#                         exactly one of its field be provided)
+directive @oneOf on INPUT_OBJECT
+
+scalar DateTimeUtc
+
 type Issue {
   owner: String!
   repo: String!
   number: Int!
   title: String!
   author: String!
+  createdAt: DateTimeUtc!
+  state: IssueState!
+  assignees: [String!]!
 }
 
 type IssueConnection {
@@ -19,12 +28,38 @@ type IssueConnection {
 
 # An edge in a connection.
 type IssueEdge {
-  # A cursor for use in pagination
-  cursor: String!
-
   # The item at the end of the edge
   node: Issue!
+
+  # A cursor for use in pagination
+  cursor: String!
 }
+
+type IssueStat {
+  # The number of open issues.
+  openIssueCount: Int!
+}
+
+input IssueStatFilter {
+  # Filter by assignee.
+  assignee: String
+
+  # Filter by issue author.
+  author: String
+
+  # Filter by repository name.
+  repo: String
+
+  # Start of the creation datetime range. (inclusive)
+  # Example format: "yyyy-MM-ddTHH:mm:ssZ"
+  begin: DateTimeUtc
+
+  # End of the creation datetime range. (exclusive)
+  # Example format: "yyyy-MM-ddTHH:mm:ssZ"
+  end: DateTimeUtc
+}
+
+scalar IssueState
 
 # Information about pagination in a connection
 type PageInfo {
@@ -63,13 +98,16 @@ type PullRequestConnection {
 
 # An edge in a connection.
 type PullRequestEdge {
-  # A cursor for use in pagination
-  cursor: String!
-
   # The item at the end of the edge
   node: PullRequest!
+
+  # A cursor for use in pagination
+  cursor: String!
 }
 
+# A set of queries defined in the schema.
+#
+# This is exposed only for [`Schema`], and not used directly.
 type Query {
   issues(after: String, before: String, first: Int, last: Int): IssueConnection!
   pullRequests(
@@ -78,4 +116,5 @@ type Query {
     first: Int
     last: Int
   ): PullRequestConnection!
+  issueStat(filter: IssueStatFilter!): IssueStat!
 }
