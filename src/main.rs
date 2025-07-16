@@ -1,15 +1,17 @@
 mod fetch;
 mod home;
-mod top_pane;
-mod pages;
 mod navigation;
+mod pages;
+mod top_pane;
 
 use yew::prelude::*;
 use yew_router::prelude::*;
 
 use crate::home::Model as HomeModel;
-use crate::pages::{dashboard::Dashboard, about::About, settings::Settings, profile::Profile};
 use crate::navigation::Navigation;
+use crate::pages::{
+    about::About, dashboard::Dashboard, profile::Profile, search::Search, settings::Settings,
+};
 
 #[derive(Debug)]
 pub enum CommonError {
@@ -27,6 +29,8 @@ pub enum Route {
     Home,
     #[at("/dashboard")]
     Dashboard,
+    #[at("/search")]
+    Search,
     #[at("/profile")]
     Profile,
     #[at("/settings")]
@@ -39,6 +43,7 @@ fn switch(routes: Route) -> Html {
     match routes {
         Route::Home => html! { <HomeModel /> },
         Route::Dashboard => html! { <Dashboard /> },
+        Route::Search => html! { <Search /> },
         Route::Profile => html! { <Profile /> },
         Route::Settings => html! { <Settings /> },
         Route::About => html! { <About /> },

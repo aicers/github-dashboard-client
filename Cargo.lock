@@ -235,6 +235,7 @@ dependencies = [
  "js-sys",
  "serde",
  "serde_json",
+ "urlencoding",
  "wasm-bindgen",
  "web-sys",
  "yew",

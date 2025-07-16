@@ -18,6 +18,9 @@ pub fn navigation() -> Html {
                 <Link<Route> to={Route::Dashboard} classes="nav-link">
                     {"Dashboard"}
                 </Link<Route>>
+                <Link<Route> to={Route::Search} classes="nav-link">
+                    {"Search"}
+                </Link<Route>>
                 <Link<Route> to={Route::Profile} classes="nav-link">
                     {"Profile"}
                 </Link<Route>>
