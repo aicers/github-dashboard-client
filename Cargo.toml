@@ -15,8 +15,11 @@ graphql_client = "0.14"
 indexmap = "2"
 implicit-clone = "0.5"
 js-sys = "0.3"
+chrono = { version = "0.4", features = ["serde", "wasmbind"] }
+regex = "1.0"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 wasm-bindgen = { version = "0.2" }
+wasm-bindgen-futures = "0.4.50"
 web-sys = "0.3"
 yew = { version = "0.21", features = ["csr"] }

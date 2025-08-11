@@ -9,9 +9,12 @@ use yew::{
     {html, Component, Context, Html, NodeRef},
 };
 
-use crate::fetch::{Common, Issues, Pulls, QueryIssue, QueryPull};
 use crate::top_pane::TopModel;
 use crate::CommonError;
+use crate::{
+    fetch::{Common, Issues, Pulls, QueryIssue, QueryPull},
+    rag::RAGComponent,
+};
 
 pub(crate) enum Message {
     IssueQueryResult(Vec<Issues>),
@@ -78,10 +81,7 @@ impl Component for Model {
                 self.pull_res_query = text;
                 true
             }
-            Message::Err(error) => {
-                log!("error", format!("{error:#?}"));
-                false
-            }
+            Message::Err(_error) => false,
             Message::SignIn(detail) => {
                 self.id_token.push_str(&detail.token);
                 self.email.push_str(&detail.email);
@@ -121,6 +121,7 @@ impl Component for Model {
                 <div>
                 <TopModel email={self.email.clone()}/>
                 <p>{ "AICE GitHub Dashboard" }</p>
+                <RAGComponent/>
                 <table class="table">
                     <thead>
                         <tr>
