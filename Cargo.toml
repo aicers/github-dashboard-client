@@ -23,3 +23,5 @@ wasm-bindgen = { version = "0.2" }
 wasm-bindgen-futures = "0.4.50"
 web-sys = "0.3"
 yew = { version = "0.21", features = ["csr"] }
+pulldown-cmark = "0.13.0"
+uuid = { version = "1.8.0", features = ["v4", "js"] }

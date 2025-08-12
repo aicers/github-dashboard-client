@@ -13,7 +13,7 @@ use crate::top_pane::TopModel;
 use crate::CommonError;
 use crate::{
     fetch::{Common, Issues, Pulls, QueryIssue, QueryPull},
-    rag::RAGComponent,
+    rag::RAGQaComponent,
 };
 
 pub(crate) enum Message {
@@ -121,7 +121,7 @@ impl Component for Model {
                 <div>
                 <TopModel email={self.email.clone()}/>
                 <p>{ "AICE GitHub Dashboard" }</p>
-                <RAGComponent/>
+                <RAGQaComponent/>
                 <table class="table">
                     <thead>
                         <tr>

@@ -173,3 +173,41 @@
 .qa-chat-area::-webkit-scrollbar-thumb:hover {
     background: #a8a8a8;
 }
+
+/* 로딩 버블 스타일 */
+.loading-bubble .typing-indicator {
+    display: flex;
+    align-items: center;
+    padding: 8px 0;
+}
+
+.loading-bubble .typing-indicator span {
+    height: 8px;
+    width: 8px;
+    background-color: #999;
+    border-radius: 50%;
+    display: inline-block;
+    margin: 0 2px;
+    animation: typing-bounce 1.2s infinite ease-in-out;
+}
+
+.loading-bubble .typing-indicator span:nth-of-type(2) {
+    animation-delay: -1.0s;
+}
+
+.loading-bubble .typing-indicator span:nth-of-type(3) {
+    animation-delay: -0.8s;
+}
+
+@keyframes typing-bounce {
+
+    0%,
+    60%,
+    100% {
+        transform: translateY(0);
+    }
+
+    30% {
+        transform: translateY(-6px);
+    }
+}

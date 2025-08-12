@@ -1,17 +1,19 @@
 use chrono::{DateTime, Utc};
 use gloo_net::http::Request;
+use pulldown_cmark::{html, Options, Parser};
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 use wasm_bindgen_futures::spawn_local;
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
-// GraphQL 응답 구조체
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GraphQLResponse {
     pub data: QueryData,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct QueryData {
     pub query: QueryResult,
 }
@@ -29,17 +31,25 @@ pub struct GraphQLRequest {
     pub variables: serde_json::Value,
 }
 
+#[derive(Debug, Clone, PartialEq)]
+pub struct ChatItem {
+    pub id: Uuid,
+    pub query: String,
+    pub answer: Option<String>,
+    pub timestamp: DateTime<Utc>,
+}
+
 pub enum Msg {
     UpdateQuery(String),
     SubmitQuery,
-    QueryResponse(Result<GraphQLResponse, String>),
+    QueryResponse(Uuid, Result<QueryResult, String>),
     ClearHistory,
     NoOp,
 }
 
 pub struct RAGQaComponent {
     current_query: String,
-    query_history: Vec<QueryResult>,
+    query_history: Vec<ChatItem>,
     is_loading: bool,
     input_ref: NodeRef,
 }
@@ -69,25 +79,42 @@ impl Component for RAGQaComponent {
                 }
 
                 self.is_loading = true;
-                let query = self.current_query.clone();
+                let query_text = self.current_query.clone();
+
+                let new_chat_item = ChatItem {
+                    id: Uuid::new_v4(),
+                    query: query_text.clone(),
+                    answer: None,
+                    timestamp: Utc::now(),
+                };
+                self.query_history.insert(0, new_chat_item.clone());
+
                 let link = ctx.link().clone();
+                let item_id = new_chat_item.id;
 
                 spawn_local(async move {
-                    let result = Self::send_graphql_query(&query).await;
-                    link.send_message(Msg::QueryResponse(result));
+                    let result = Self::send_graphql_query(&query_text).await;
+                    link.send_message(Msg::QueryResponse(item_id, result));
                 });
 
                 self.current_query.clear();
                 true
             }
-            Msg::QueryResponse(result) => {
+            Msg::QueryResponse(id, result) => {
                 self.is_loading = false;
-                match result {
-                    Ok(response) => {
-                        self.query_history.push(response.data.query);
-                    }
-                    Err(error) => {
-                        web_sys::console::error_1(&format!("Query failed: {error}").into());
+
+                if let Some(item_to_update) =
+                    self.query_history.iter_mut().find(|item| item.id == id)
+                {
+                    match result {
+                        Ok(response) => {
+                            item_to_update.answer = Some(response.answer);
+                        }
+                        Err(error) => {
+                            web_sys::console::error_1(&format!("Query failed: {error}").into());
+                            item_to_update.answer =
+                                Some(format!("**오류가 발생했습니다:**\n\n```\n{error}\n```"));
+                        }
                     }
                 }
                 true
@@ -108,14 +135,14 @@ impl Component for RAGQaComponent {
                     <button
                         class={classes!("clear-btn")}
                         onclick={ctx.link().callback(|_| Msg::ClearHistory)}
-                        disabled={self.query_history.is_empty()}
+                        disabled={self.query_history.is_empty() || self.is_loading}
                     >
-                        {"Clear History"}
+                        {"기록 삭제"}
                     </button>
                 </div>
 
                 <div class="qa-chat-area">
-                    {self.render_chat_history()}
+                    { self.render_chat_history() }
                 </div>
 
                 <div class="qa-input-area">
@@ -131,11 +158,7 @@ impl Component for RAGQaComponent {
                                 Msg::UpdateQuery(input.value())
                             })}
                             onkeydown={ctx.link().callback(|e: KeyboardEvent| {
-                                if e.key() == "Enter" {
-                                    Msg::SubmitQuery
-                                } else {
-                                    Msg::NoOp
-                                }
+                                if e.key() == "Enter" { Msg::SubmitQuery } else { Msg::NoOp }
                             })}
                             disabled={self.is_loading}
                         />
@@ -144,7 +167,7 @@ impl Component for RAGQaComponent {
                             onclick={ctx.link().callback(|_| Msg::SubmitQuery)}
                             disabled={self.is_loading || self.current_query.trim().is_empty()}
                         >
-                            {if self.is_loading { "Loading..." } else { "Send" }}
+                            { "전송" }
                         </button>
                     </div>
                 </div>
@@ -158,58 +181,67 @@ impl RAGQaComponent {
         if self.query_history.is_empty() {
             return html! {
                 <div class="empty-state">
-                    <p>{"질문을 입력해보세요!"}</p>
+                    <p>{"질문을 입력하여 분석을 시작하세요!"}</p>
                 </div>
             };
         }
 
         html! {
             <div class="chat-history">
-                {for self.query_history.iter().rev().map(|item| self.render_qa_item(item))}
+                {for self.query_history.iter().map(Self::render_qa_item)}
             </div>
         }
     }
-    #[allow(clippy::unused_self)]
-    fn render_qa_item(&self, item: &QueryResult) -> Html {
-        let cleaned_answer = Self::clean_answer(&item.answer);
-        let formatted_time = item.timestamp.format("%Y-%m-%d %H:%M:%S").to_string();
+
+    fn render_qa_item(item: &ChatItem) -> Html {
+        let formatted_time = item.timestamp.format("%Y-%m-%d %H:%M").to_string();
 
         html! {
             <div class="qa-item">
                 <div class="question-bubble">
                     <div class="bubble-content">
-                        <strong>{"Q: "}</strong>
                         {&item.query}
                     </div>
                     <div class="timestamp">{formatted_time}</div>
                 </div>
 
-                <div class="answer-bubble">
-                    <div class="bubble-content">
-                        <strong>{"A: "}</strong>
-                        <div class="answer-text">
-                            { Html::from_html_unchecked(AttrValue::from(cleaned_answer)) }
-                        </div>
-                    </div>
-                </div>
+                {
+                    if let Some(answer_text) = &item.answer {
+                        let answer_html = Self::markdown_to_html(answer_text);
+                        html! {
+                            <div class="answer-bubble">
+                                <div class="markdown-content">
+                                    { Html::from_html_unchecked(AttrValue::from(answer_html)) }
+                                </div>
+                            </div>
+                        }
+                    } else {
+                        html! {
+                            <div class="answer-bubble loading-bubble">
+                                <div class="typing-indicator">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                            </div>
+                        }
+                    }
+                }
             </div>
         }
     }
 
-    fn clean_answer(raw_answer: &str) -> String {
-        let unescaped = raw_answer.replace("\\\"", "\"").replace("\\n", "\n");
-
-        let re = regex::Regex::new(r"<think>.*?</think>").unwrap();
-        let without_think = re.replace_all(&unescaped, "");
-
-        let trimmed = without_think.trim_matches('"').trim();
-
-        let with_bold = trimmed.replace("**", "<strong>").replace("**", "</strong>");
-
-        with_bold.to_string()
+    fn markdown_to_html(markdown_input: &str) -> String {
+        let mut options = Options::empty();
+        options.insert(Options::ENABLE_STRIKETHROUGH);
+        options.insert(Options::ENABLE_TABLES);
+        let parser = Parser::new_ext(markdown_input, options);
+        let mut html_output = String::new();
+        html::push_html(&mut html_output, parser);
+        html_output
     }
 
-    async fn send_graphql_query(query: &str) -> Result<GraphQLResponse, String> {
+    async fn send_graphql_query(query: &str) -> Result<QueryResult, String> {
         let graphql_query = r"
             query Query($query: String!) {
                 query(query: $query) {
@@ -219,14 +251,10 @@ impl RAGQaComponent {
                 }
             }
         ";
-
         let request = GraphQLRequest {
             query: graphql_query.to_string(),
-            variables: serde_json::json!({
-                "query": query
-            }),
+            variables: serde_json::json!({ "query": query }),
         };
-
         let response = Request::post("/graphql")
             .header("Content-Type", "application/json")
             .json(&request)
@@ -240,17 +268,16 @@ impl RAGQaComponent {
                 .json::<GraphQLResponse>()
                 .await
                 .map_err(|e| format!("JSON parsing failed: {e}"))
+                .map(|gql_response| gql_response.data.query)
         } else {
             Err(format!("HTTP Error: {}", response.status()))
         }
     }
 }
 
-#[function_component(RAGComponent)]
+#[function_component(RagApp)]
 pub fn app() -> Html {
     html! {
-        <>
-            <RAGQaComponent />
-        </>
+        <RAGQaComponent />
     }
 }
