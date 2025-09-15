@@ -35,11 +35,6 @@ type IssueEdge {
   cursor: String!
 }
 
-type IssueStat {
-  # The number of open issues.
-  openIssueCount: Int!
-}
-
 input IssueStatFilter {
   # Filter by assignee.
   assignee: String
@@ -105,6 +100,58 @@ type PullRequestEdge {
   cursor: String!
 }
 
+# Represents statistics for issues.
+type IssueStat {
+  openIssueCount: Int!
+  resolvedIssueCount: Int!
+  resolvedIssueSizeDistribution: [IssueSizeCount!]!
+}
+
+# A type for the distribution of resolved issues by size.
+type IssueSizeCount {
+  size: String!
+  count: Int!
+}
+
+# An input object for filtering issue statistics.
+input IssueStatFilter {
+  assignee: String
+  author: String
+  repo: String
+  begin: String
+  end: String
+}
+
+# Represents statistics for pull requests.
+type PullRequestStat {
+  openPrCount: Int!
+  mergedPrCount: Int!
+  avgReviewCommentCount: Float
+  avgMergeDays: Float
+}
+
+# An input object for filtering pull request statistics.
+input PullRequestStatFilter {
+  author: String
+  repo: String
+  begin: String
+  end: String
+}
+
+# Represents statistics for discussions.
+type DiscussionStat {
+  totalCount: Int!
+  commentCount: Int!
+}
+
+# An input object for filtering discussion statistics.
+input DiscussionStatFilter {
+  author: String
+  repo: String
+  begin: String
+  end: String
+}
+
 # A set of queries defined in the schema.
 #
 # This is exposed only for [`Schema`], and not used directly.
@@ -117,4 +164,6 @@ type Query {
     last: Int
   ): PullRequestConnection!
   issueStat(filter: IssueStatFilter!): IssueStat!
+  pullRequestStat(filter: PullRequestStatFilter!): PullRequestStat!
+  discussionStat(filter: DiscussionStatFilter!): DiscussionStat!
 }

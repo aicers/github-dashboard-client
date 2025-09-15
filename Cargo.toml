@@ -20,3 +20,7 @@ serde_json = "1"
 wasm-bindgen = { version = "0.2" }
 web-sys = "0.3"
 yew = { version = "0.21", features = ["csr"] }
+yew-router = "0.18"
+yew-hooks = "0.3"
+reqwest = { version = "0.11", features = ["json"] }
+stylist = { version = "0.13", features = ["yew"] }

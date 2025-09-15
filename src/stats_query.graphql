@@ -1,0 +1,26 @@
+# This query fetches statistics for issues, pull requests, and discussions.
+# It accepts filter objects to narrow down the results.
+query StatsQuery(
+  $issueFilter: IssueStatFilter!
+  $prFilter: PullRequestStatFilter!
+  $discussionFilter: DiscussionStatFilter!
+) {
+  issueStat(filter: $issueFilter) {
+    openIssueCount
+    resolvedIssueCount
+    resolvedIssueSizeDistribution {
+      size
+      count
+    }
+  }
+  pullRequestStat(filter: $prFilter) {
+    openPrCount
+    mergedPrCount
+    avgReviewCommentCount
+    avgMergeDays
+  }
+  discussionStat(filter: $discussionFilter) {
+    totalCount
+    commentCount
+  }
+}
